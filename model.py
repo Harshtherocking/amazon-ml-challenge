@@ -6,11 +6,13 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from transformers import BertModel, BertTokenizer
 from sentence_transformers import SentenceTransformer
 
+device = device or (torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
+
 IMAGE_PROCESSOR = ViTImageProcessor.from_pretrained('google/vit-large-patch16-224-in21k')
-IMAGE_ENCODER = ViTModel.from_pretrained('google/vit-large-patch16-224-in21k', device_map="auto" )
+IMAGE_ENCODER = ViTModel.from_pretrained('google/vit-large-patch16-224-in21k', device= device )
 # !pip install transformers torch accelerate flash-attn
 
-TEXT_ENCODER = BertModel.from_pretrained('bert-base-uncased', device_map = "auto")
+TEXT_ENCODER = BertModel.from_pretrained('bert-base-uncased', device = device)
 TEXT_TOKENIZER = BertTokenizer.from_pretrained("bert-base-uncased")
 
 
