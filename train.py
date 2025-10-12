@@ -88,7 +88,7 @@ if __name__ == "__main__" :
 
     dataloader = DataLoader(
         AmazonDataset(csv_path=csv_path),
-        batch_size=4,
+        batch_size=32,
         shuffle=False,
         num_workers=0,
         collate_fn=collate_fn
