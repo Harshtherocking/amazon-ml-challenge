@@ -28,7 +28,13 @@ class AmazonDataset(Dataset):
             image = Image.open(image_path).convert('RGB')
         except Exception as e:
             print(f"Warning: Failed to load image sample {row['sample_id']} from {image_path}: {e}")
-            image = torch.ones((3, 224, 224))
+            try:
+                response = requests.get(image_link, timeout=10)
+                response.raise_for_status()
+                image = Image.open(BytesIO(response.content)).convert('RGB')
+            except Exception as e:
+                print(f"Warning: Failed to download image sample {row['sample_id']} from {image_link}: {e}")
+                image = torch.ones((3, 224, 224))
 
         sample = {
             'text': text,
