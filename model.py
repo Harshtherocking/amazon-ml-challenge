@@ -9,12 +9,14 @@ from sentence_transformers import SentenceTransformer
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 IMAGE_PROCESSOR = ViTImageProcessor.from_pretrained('google/vit-large-patch16-224-in21k')
-IMAGE_ENCODER = ViTModel.from_pretrained('google/vit-large-patch16-224-in21k', device= device )
+IMAGE_ENCODER = ViTModel.from_pretrained('google/vit-large-patch16-224-in21k')
 # !pip install transformers torch accelerate flash-attn
 
-TEXT_ENCODER = BertModel.from_pretrained('bert-base-uncased', device = device)
+TEXT_ENCODER = BertModel.from_pretrained('bert-base-uncased')
 TEXT_TOKENIZER = BertTokenizer.from_pretrained("bert-base-uncased")
 
+IMAGE_ENCODER.to(device)
+TEXT_ENCODER.to(device)
 
 # class Regression_head (nn.Module) : 
 #     def __init__(self, image_dim : int, text_dim : int, hid_dim : int, *args, **kwargs) -> None:
