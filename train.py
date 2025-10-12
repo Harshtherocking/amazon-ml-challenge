@@ -13,11 +13,12 @@ import io
 from dataset import AmazonDataset, collate_fn
 from torch.utils.data import DataLoader
 
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 
 def get_text_vision_emb(texts, images):
-    text_inputs = TEXT_TOKENIZER(texts,  padding = True, truncation = True, return_tensors = "pt")
-    image_inputs = IMAGE_PROCESSOR(images, return_tensors="pt")
+    text_inputs = TEXT_TOKENIZER(texts,  padding = True, truncation = True, return_tensors = "pt").to(device)
+    image_inputs = IMAGE_PROCESSOR(images, return_tensors="pt").to(device)
 
     text_out = TEXT_ENCODER(**text_inputs)
     image_out = IMAGE_ENCODER(**image_inputs)
@@ -28,9 +29,10 @@ def get_text_vision_emb(texts, images):
 
 
 
-def train_batch(dataloader, model, device=None, epochs=3, lr=1e-4, log_dir='runs'):
-    device = device or (torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
+def train_batch(dataloader, model, device=device, epochs=3, lr=1e-4, log_dir='runs'):
     model = model.to(device)
+    IMAGE_ENCODER.to(device)
+    TEXT_ENCODER.to(device)
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)
