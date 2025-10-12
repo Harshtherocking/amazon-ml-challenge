@@ -57,6 +57,7 @@ def train_batch(dataloader, model, device=device, epochs=3, lr=1e-4, log_dir='ru
 
             text_batch = text_embs.to(device)
             image_batch = image_embs.to(device)
+            targets.to(device)
 
 
             preds = model(text_batch, image_batch)
