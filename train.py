@@ -9,7 +9,7 @@ import pandas as pd
 from torch.utils.tensorboard import SummaryWriter
 import time
 import io
-
+from tqdm import tqdm
 from dataset import AmazonDataset, collate_fn
 from torch.utils.data import DataLoader
 
@@ -47,7 +47,7 @@ def train_batch(dataloader, model, device=device, epochs=3, lr=1e-4, log_dir='ru
         n_samples = 0
 
         print("Epoch Training started")
-        for batch in dataloader:
+        for batch in tqdm(dataloader):
             texts = batch.get('texts')
             images = batch.get('images')
             targets = batch.get('targets')
@@ -91,9 +91,9 @@ if __name__ == "__main__" :
 
     dataloader = DataLoader(
         AmazonDataset(csv_path,image_path),
-        batch_size=8,
+        batch_size=4,
         shuffle=False,
-        num_workers=8,
+        num_workers=16,
         collate_fn=collate_fn
     )
     print("DataLoader loaded")
