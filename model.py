@@ -18,6 +18,10 @@ TEXT_TOKENIZER = BertTokenizer.from_pretrained("bert-base-uncased")
 IMAGE_ENCODER.to(device)
 TEXT_ENCODER.to(device)
 
+# Set encoders to eval mode since we're using them for feature extraction
+IMAGE_ENCODER.eval()
+TEXT_ENCODER.eval()
+
 # class Regression_head (nn.Module) : 
 #     def __init__(self, image_dim : int, text_dim : int, hid_dim : int, *args, **kwargs) -> None:
 #         super().__init__(*args, **kwargs)

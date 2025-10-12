@@ -15,12 +15,18 @@ from torch.utils.data import DataLoader
 
 
 
-def get_text_vision_emb(texts, images):
+def get_text_vision_emb(texts, images, device):
     text_inputs = TEXT_TOKENIZER(texts,  padding = True, truncation = True, return_tensors = "pt")
     image_inputs = IMAGE_PROCESSOR(images, return_tensors="pt")
 
-    text_out = TEXT_ENCODER(**text_inputs)
-    image_out = IMAGE_ENCODER(**image_inputs)
+    # Move inputs to device
+    text_inputs = {k: v.to(device) for k, v in text_inputs.items()}
+    image_inputs = {k: v.to(device) for k, v in image_inputs.items()}
+
+    # Use no_grad since encoders are frozen
+    with torch.no_grad():
+        text_out = TEXT_ENCODER(**text_inputs)
+        image_out = IMAGE_ENCODER(**image_inputs)
 
     text_emb = text_out.last_hidden_state[:, 0, :]
     image_emb = image_out.last_hidden_state[:, 0, :]
@@ -30,6 +36,7 @@ def get_text_vision_emb(texts, images):
 
 def train_batch(dataloader, model, device=None, epochs=3, lr=1e-4, log_dir='runs'):
     device = device or (torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
+    print(f"Training on device: {device}")
     model = model.to(device)
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -49,13 +56,15 @@ def train_batch(dataloader, model, device=None, epochs=3, lr=1e-4, log_dir='runs
             texts = batch.get('texts')
             images = batch.get('images')
             targets = batch.get('targets')
-            
-            text_embs, image_embs = get_text_vision_emb(texts, images)
 
+            text_embs, image_embs = get_text_vision_emb(texts, images, device)
 
-            text_batch = text_embs.to(device)
-            image_batch = image_embs.to(device)
+            # Embeddings are already on device from get_text_vision_emb
+            text_batch = text_embs
+            image_batch = image_embs
 
+            # Move targets to device
+            targets = targets.to(device)
 
             preds = model(text_batch, image_batch)
             loss = criterion(preds, targets)
@@ -87,7 +96,7 @@ if __name__ == "__main__" :
     image_path = '/content/drive/MyDrive/amazon/images/train_images'
 
     dataloader = DataLoader(
-        AmazonDataset(csv_path=csv_path,image_path),
+        AmazonDataset(csv_path, image_path),
         batch_size=32,
         shuffle=False,
         num_workers=0,
