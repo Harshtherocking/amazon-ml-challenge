@@ -6,7 +6,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from transformers import BertModel, BertTokenizer
 from sentence_transformers import SentenceTransformer
 
-device = device or (torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'))
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 IMAGE_PROCESSOR = ViTImageProcessor.from_pretrained('google/vit-large-patch16-224-in21k')
 IMAGE_ENCODER = ViTModel.from_pretrained('google/vit-large-patch16-224-in21k', device= device )
