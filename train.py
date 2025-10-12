@@ -87,7 +87,7 @@ if __name__ == "__main__" :
     image_path = '/content/drive/MyDrive/amazon/images/train_images'
 
     dataloader = DataLoader(
-        AmazonDataset(csv_path=csv_path),
+        AmazonDataset(csv_path=csv_path,image_path),
         batch_size=32,
         shuffle=False,
         num_workers=0,
