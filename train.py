@@ -93,7 +93,7 @@ if __name__ == "__main__" :
         AmazonDataset(csv_path=csv_path,image_path),
         batch_size=32,
         shuffle=False,
-        num_workers=0,
+        num_workers=8,
         collate_fn=collate_fn
     )
     print("DataLoader loaded")
