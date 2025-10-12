@@ -30,7 +30,7 @@ def get_text_vision_emb(texts, images):
 
 
 def train_batch(dataloader, model, device=device, epochs=3, lr=1e-4, log_dir='runs'):
-    model = model.to(device)
+    model.to(device)
     IMAGE_ENCODER.to(device)
     TEXT_ENCODER.to(device)
 
