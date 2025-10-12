@@ -8,8 +8,9 @@ import requests
 from io import BytesIO
 
 class AmazonDataset(Dataset):
-    def __init__(self, csv_path): 
+    def __init__(self, csv_path, images_path):
         self.df = pd.read_csv(csv_path)
+        self.images_path = images_path
     
     def __len__(self):
         return len(self.df)
@@ -19,15 +20,16 @@ class AmazonDataset(Dataset):
         text = row['catalog_content']
         image_link = row['image_link']
         value = row['price']
-        
+
+        image_name = image_link.split('/')[-1]
+        image_path = os.path.join(self.images_path, image_name)
+
         try:
-            response = requests.get(image_link, timeout=10)
-            response.raise_for_status()
-            image = Image.open(BytesIO(response.content)).convert('RGB')
+            image = Image.open(image_path).convert('RGB')
         except Exception as e:
-            print(f"Warning: Failed to download image sample {row['sample_id']} from {image_link}: {e}")
+            print(f"Warning: Failed to load image sample {row['sample_id']} from {image_path}: {e}")
             image = torch.ones((3, 224, 224))
-        
+
         sample = {
             'text': text,
             'image': image,
