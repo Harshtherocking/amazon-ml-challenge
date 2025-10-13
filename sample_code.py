@@ -72,10 +72,10 @@ def predictor(sample_id, catalog_content, image_link):
     return inv[0]
 
 if __name__ == "__main__":
-    DATASET_FOLDER = r'/Users/ayush/dev/train fas fas/amazon-ml-challenge/dataset/'
+    DATASET_FOLDER = r'/content/drive/MyDrive/amazon'
     
     # Read test data
-    test = pd.read_csv(os.path.join(DATASET_FOLDER, 'sample_test.csv'))
+    test = pd.read_csv(os.path.join(DATASET_FOLDER, 'test.csv'))
     
     # Apply predictor function to each row
     test['price'] = test.apply(
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     output_df = test[['sample_id', 'price']]
     
     # Save predictions
-    output_filename = os.path.join(DATASET_FOLDER, 'sample_test_out.csv')
+    output_filename = os.path.join(DATASET_FOLDER, 'test_out.csv')
     output_df.to_csv(output_filename, index=False)
     
     print(f"Predictions saved to {output_filename}")
