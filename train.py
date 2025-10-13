@@ -50,19 +50,19 @@ def train_batch(dataloader, model, device=device, epochs=3, lr=1e-4, log_dir='ru
         for batch in tqdm(dataloader):
             texts = batch.get('texts')
             images = batch.get('images')
-            targets = batch.get('targets')
+            targets = batch.get('targets').to(device)
             
             text_embs, image_embs = get_text_vision_emb(texts, images)
 
 
             text_batch = text_embs.to(device)
             image_batch = image_embs.to(device)
-            targets.to(device)
+            # targets.to(device)
 
 
             preds = model(text_batch, image_batch)
             loss = criterion(preds, targets)
-            print(loss)
+            # print(loss)
 
             optimizer.zero_grad()
             loss.backward()
@@ -79,8 +79,13 @@ def train_batch(dataloader, model, device=device, epochs=3, lr=1e-4, log_dir='ru
         writer.add_scalar('train/epoch_loss', epoch_loss, epoch)
         print(f'Epoch {epoch+1}/{epochs} - loss: {epoch_loss:.4f}')
 
+        torch.save(model.state_dict(), f"model_epoch_{epoch}")
+
         scheduler.step()
         writer.add_scalar('train/lr', optimizer.param_groups[0]['lr'], epoch)
+
+        torch.save(model.state_dict(), f"reg_head_epoch_{epoch}")
+        print("Model saved")
 
     writer.close()
 
@@ -91,13 +96,13 @@ if __name__ == "__main__" :
 
     dataloader = DataLoader(
         AmazonDataset(csv_path,image_path),
-        batch_size=4,
-        shuffle=False,
-        num_workers=16,
+        batch_size=16,
+        shuffle=True,
+        num_workers=8,
         collate_fn=collate_fn
     )
     print("DataLoader loaded")
 
     model = LinearRegressionHead(IMAGE_ENCODER.config.hidden_size, TEXT_ENCODER.config.hidden_size)
 
-    train_batch(dataloader,model, epochs= 1)
+    train_batch(dataloader,model, epochs= 3)

@@ -50,9 +50,10 @@ class LinearRegressionHead(nn.Module) :
         # self.hid_dim = hid_dim
 
         self.W1 = nn.Linear(in_features= text_dim + image_dim , out_features= 1024)
-        self.W2 = nn.Linear(1024, 512)
-        self.W3 = nn.Linear(512, 256)
-        self.W4 = nn.Linear(256, 1)
+        self.W2 = nn.Linear(1024, 256)
+        # self.W3 = nn.Linear(512, 256)
+        self.W3 = nn.Linear(256, 1)
+        self.relu = nn.ReLU()
 
         self.sigmoid = nn.Sigmoid()
 
@@ -60,9 +61,9 @@ class LinearRegressionHead(nn.Module) :
     def forward(self, text_emd, image_emd) : 
         comb_emd = torch.concat((text_emd,image_emd), dim =1)
         x = self.W1(comb_emd)
+        x = self.relu(x)
         x = self.W2(x)
+        x = self.relu(x)
         x = self.W3(x)
-        x = self.W4(x)
-        
         return self.sigmoid(x)
 
