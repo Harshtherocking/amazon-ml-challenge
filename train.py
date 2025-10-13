@@ -115,6 +115,6 @@ if __name__ == "__main__" :
     )
     print("DataLoader loaded")
 
-    model = LinearRegressionHead(IMAGE_ENCODER.config.hidden_size, TEXT_ENCODER.config.hidden_size)
+    model = RegressionHead(IMAGE_ENCODER.config.hidden_size, TEXT_ENCODER.config.hidden_size)
 
     train_batch(dataloader,model, epochs= 3)
