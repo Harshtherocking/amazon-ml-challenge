@@ -4,16 +4,17 @@ import pandas as pd
 import torch
 from PIL import Image
 import requests
-from model import LinearRegressionHead, IMAGE_PROCESSOR, IMAGE_ENCODER, TEXT_ENCODER, TEXT_TOKENIZER
+from model import RegressionHead, IMAGE_PROCESSOR, IMAGE_ENCODER, TEXT_ENCODER, TEXT_TOKENIZER
 from train import get_text_vision_emb
-from text_transform import parse_catalog_content
+from text_transform import parse_catalog_content, transform, inverse_transform
 from src.utils import download_image
 from io import BytesIO
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-state_dict = torch.load("path")
-model = LinearRegressionHead(IMAGE_ENCODER.config.hidden_size, TEXT_ENCODER.config.hidden_size).load_state_dict(state_dict)
+state_dict = torch.load("reg_head_epoch_0")
+model = RegressionHead(IMAGE_ENCODER.config.hidden_size, TEXT_ENCODER.config.hidden_size).load_state_dict(state_dict)
+# model = RegressionHead(IMAGE_ENCODER.config.hidden_size, TEXT_ENCODER.config.hidden_size)
 
 model.to(device)
 IMAGE_ENCODER.to(device)
@@ -58,11 +59,17 @@ def predictor(sample_id, catalog_content, image_link):
     # ==============================
     # text emb + image emb 
     text_emb, image_emb = get_text_vision_emb(formatted, image)
-    print(text_emb, image_emb)
+    text_emb.to(device)
+    image_emb.to(device)
     # ==============================
     # model (text emb, image emb)
+    output = model(text_emb, image_emb)
+    # ==============================
     # inverse transform
-    return round(random.uniform(5.0, 500.0), 2)
+    inv = inverse_transform(output.detach().numpy(), scaler=r"dataset/price_scaler.pkl", rbscaler=r"dataset/rb_scaler.pkl")
+    print(inv[0])
+    # ==============================
+    return inv[0]
 
 if __name__ == "__main__":
     DATASET_FOLDER = r'/Users/ayush/dev/train fas fas/amazon-ml-challenge/dataset/'

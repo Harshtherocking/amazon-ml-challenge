@@ -1,7 +1,8 @@
 import re 
 import html
 import pandas as pd
-
+import numpy as np
+import pickle
 
 def remove_emojis(text):
     """Remove emojis from text"""
@@ -81,3 +82,58 @@ def parse_catalog_content(catalog_content):
         "value": value,
         "unit": unit
     }
+
+from sklearn.preprocessing import MinMaxScaler, RobustScaler
+
+
+
+
+
+
+
+
+
+
+def transform(prices, scaler=None, rbscaler=None):
+    prices = np.array(prices).reshape(-1, 1)
+
+    # 1
+    log_prices = np.log1p(prices)
+
+    if scaler is None or rbscaler is None:
+      #2
+        rbscale = RobustScaler()
+        rb_prices = rbscale.fit_transform(log_prices)  # Changed: save result
+        #3
+        scaler = MinMaxScaler()
+        normalized_prices = scaler.fit_transform(rb_prices)  # Changed: use rb_prices
+
+        with open('price_scaler.pkl', 'wb') as f:
+            pickle.dump(scaler, f)
+        with open('rb_scaler.pkl', 'wb') as f:
+            pickle.dump(rbscale, f)
+    else:
+        with open(scaler, 'rb') as f:
+            scaler = pickle.load(f)
+        with open(rbscaler, 'rb') as f:
+            rbscaler = pickle.load(f)
+        rb_prices = rbscaler.transform(log_prices)
+        normalized_prices = scaler.transform(rb_prices)
+
+    return normalized_prices.flatten()
+
+def inverse_transform(normalized_prices, scaler, rbscaler):
+    normalized_prices = np.array(normalized_prices).reshape(-1, 1)
+
+    with open(scaler, 'rb') as f:
+        scaler = pickle.load(f)
+    with open(rbscaler, 'rb') as f:
+        rbscaler = pickle.load(f)
+    #3
+    rb_prices = scaler.inverse_transform(normalized_prices)  # Changed: inverse MinMaxScaler first
+    #2
+    log_prices = rbscaler.inverse_transform(rb_prices)  # Changed: then inverse RobustScaler
+    #1
+    original_prices = np.expm1(log_prices)
+
+    return original_prices.flatten()
