@@ -32,8 +32,9 @@ def get_text_vision_emb(texts, images):
 
     # text_emb = text_out.last_hidden_state[:, 0, :]
     # image_emb = image_out.last_hidden_state[:, 0, :]
-    text_emb = mean_pooling(text_out, text_out['attention_mask'])
-    image_emb = mean_pooling(image_out, image_out['attention_mask'])
+    text_emb = mean_pooling(text_out, text_inputs['attention_mask'])
+    image_emb = image_out.pooler_output
+    # image_emb = mean_pooling(image_out, image_out['attention_mask'])
     return text_emb, image_emb
 
 
