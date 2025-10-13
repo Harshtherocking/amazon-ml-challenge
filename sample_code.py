@@ -12,9 +12,11 @@ from io import BytesIO
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-state_dict = torch.load("reg_head_epoch_0")
-model = RegressionHead(IMAGE_ENCODER.config.hidden_size, TEXT_ENCODER.config.hidden_size).load_state_dict(state_dict)
+state_dict = torch.load("reg_head_epoch_1", map_location=torch.device('cpu'))
+model = RegressionHead(IMAGE_ENCODER.config.hidden_size, TEXT_ENCODER.config.hidden_size)
 # model = RegressionHead(IMAGE_ENCODER.config.hidden_size, TEXT_ENCODER.config.hidden_size)
+
+model.load_state_dict(state_dict)
 
 model.to(device)
 IMAGE_ENCODER.to(device)
@@ -66,16 +68,18 @@ def predictor(sample_id, catalog_content, image_link):
     output = model(text_emb, image_emb)
     # ==============================
     # inverse transform
-    inv = inverse_transform(output.detach().numpy(), scaler=r"dataset/price_scaler.pkl", rbscaler=r"dataset/rb_scaler.pkl")
-    print(inv[0])
+    inv = inverse_transform(output.detach().numpy(), scaler=r"price_scaler.pkl", rbscaler=r"rb_scaler.pkl")
+    print(f"{sample_id}, {inv[0]}")
     # ==============================
     return inv[0]
 
 if __name__ == "__main__":
     DATASET_FOLDER = r'/content/drive/MyDrive/amazon'
+    # DATASET_FOLDER = r'./dataset'
     
     # Read test data
     test = pd.read_csv(os.path.join(DATASET_FOLDER, 'test.csv'))
+    # test = pd.read_csv(os.path.join(DATASET_FOLDER, 'train.csv'))[:100]
     
     # Apply predictor function to each row
     test['price'] = test.apply(
@@ -88,6 +92,7 @@ if __name__ == "__main__":
     
     # Save predictions
     output_filename = os.path.join(DATASET_FOLDER, 'test_out.csv')
+    # output_filename = os.path.join(DATASET_FOLDER, 'train_out.csv')
     output_df.to_csv(output_filename, index=False)
     
     print(f"Predictions saved to {output_filename}")
