@@ -1,7 +1,7 @@
 import torch 
 from torch import nn
 from torch import optim
-from model import LinearRegressionHead, IMAGE_PROCESSOR, IMAGE_ENCODER, TEXT_ENCODER, TEXT_TOKENIZER
+from model import RegressionHead, IMAGE_PROCESSOR, IMAGE_ENCODER, TEXT_ENCODER, TEXT_TOKENIZER
 from PIL import Image
 import requests
 import os
