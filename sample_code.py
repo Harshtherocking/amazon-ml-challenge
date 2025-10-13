@@ -12,13 +12,12 @@ from io import BytesIO
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-state_dict = torch.load("reg_head_epoch_1", map_location=torch.device('cpu'))
+state_dict = torch.load("reg_head_epoch_2")
 model = RegressionHead(IMAGE_ENCODER.config.hidden_size, TEXT_ENCODER.config.hidden_size)
-# model = RegressionHead(IMAGE_ENCODER.config.hidden_size, TEXT_ENCODER.config.hidden_size)
+model.to(device)
 
 model.load_state_dict(state_dict)
 
-model.to(device)
 IMAGE_ENCODER.to(device)
 TEXT_ENCODER.to(device)
 
