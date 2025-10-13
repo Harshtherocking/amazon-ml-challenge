@@ -67,7 +67,7 @@ def predictor(sample_id, catalog_content, image_link):
     output = model(text_emb, image_emb)
     # ==============================
     # inverse transform
-    inv = inverse_transform(output.detach().numpy(), scaler=r"price_scaler.pkl", rbscaler=r"rb_scaler.pkl")
+    inv = inverse_transform(output.cpu().detach().numpy(), scaler=r"price_scaler.pkl", rbscaler=r"rb_scaler.pkl")
     print(f"{sample_id}, {inv[0]}")
     # ==============================
     return inv[0]
