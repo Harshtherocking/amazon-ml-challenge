@@ -91,8 +91,8 @@ def train_batch(dataloader, model, device=device, epochs=3, lr=1e-4, log_dir='ru
 
 
 if __name__ == "__main__" : 
-    csv_path = r'C:\Users\harsh\OneDrive\Desktop\amazon-ml-challenge\dataset\train_transformed_sep.csv'
-    image_path = r'C:\Users\harsh\OneDrive\Desktop\amazon-ml-challenge\images\train'
+    csv_path = r'/content/drive/MyDrive/amazon/train_transformed_sep.csv'
+    image_path = r'/content/drive/MyDrive/amazon/images/train_images'
 
     dataloader = DataLoader(
         AmazonDataset(csv_path,image_path),
