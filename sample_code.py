@@ -1,6 +1,19 @@
 import os
 import random
 import pandas as pd
+import torch
+from PIL import Image
+import requests
+from model import LinearRegressionHead, IMAGE_PROCESSOR, IMAGE_ENCODER, TEXT_ENCODER, TEXT_TOKENIZER
+
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
+state_dict = torch.load("path")
+model = LinearRegressionHead(IMAGE_ENCODER.config.hidden_size, TEXT_ENCODER.config.hidden_size).load_state_dict(state_dict)
+
+model.to(device)
+IMAGE_ENCODER.to(device)
+TEXT_ENCODER.to(device)
 
 def predictor(sample_id, catalog_content, image_link):
     '''
@@ -14,10 +27,12 @@ def predictor(sample_id, catalog_content, image_link):
     Returns:
     - price: Predicted price as a float
     '''
-    # TODO: Implement your price prediction logic here
-    # This is just a dummy implementation
-    
-    # Generate random price between 5 and 500
+    # catalog content preprocessing 
+    # image_link download 
+    # text emb
+    # image emb 
+    # model (text emb, image emb)
+    # inverse transform
     return round(random.uniform(5.0, 500.0), 2)
 
 if __name__ == "__main__":

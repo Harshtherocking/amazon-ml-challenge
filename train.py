@@ -16,23 +16,37 @@ from torch.utils.data import DataLoader
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 
+def mean_pooling(model_output, attention_mask):
+    token_embeddings = model_output[0] # First element of model_output contains all token embeddings
+    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+    return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+
+
 def get_text_vision_emb(texts, images):
     text_inputs = TEXT_TOKENIZER(texts,  padding = True, truncation = True, return_tensors = "pt").to(device)
     image_inputs = IMAGE_PROCESSOR(images, return_tensors="pt").to(device)
 
-    text_out = TEXT_ENCODER(**text_inputs)
-    image_out = IMAGE_ENCODER(**image_inputs)
+    with torch.no_grad() :
+        text_out = TEXT_ENCODER(**text_inputs)
+        image_out = IMAGE_ENCODER(**image_inputs)
 
-    text_emb = text_out.last_hidden_state[:, 0, :]
-    image_emb = image_out.last_hidden_state[:, 0, :]
+    # text_emb = text_out.last_hidden_state[:, 0, :]
+    # image_emb = image_out.last_hidden_state[:, 0, :]
+    text_emb = mean_pooling(text_out, text_out['attention_mask'])
+    image_emb = mean_pooling(image_out, image_out['attention_mask'])
     return text_emb, image_emb
 
 
 
 def train_batch(dataloader, model, device=device, epochs=3, lr=1e-4, log_dir='runs'):
     model.to(device)
+    model.train()
+
     IMAGE_ENCODER.to(device)
     TEXT_ENCODER.to(device)
+
+    IMAGE_ENCODER.eval()
+    TEXT_ENCODER.eval()
 
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.5)
@@ -78,8 +92,6 @@ def train_batch(dataloader, model, device=device, epochs=3, lr=1e-4, log_dir='ru
         epoch_loss = epoch_loss / max(1, n_samples)
         writer.add_scalar('train/epoch_loss', epoch_loss, epoch)
         print(f'Epoch {epoch+1}/{epochs} - loss: {epoch_loss:.4f}')
-
-        torch.save(model.state_dict(), f"model_epoch_{epoch}")
 
         scheduler.step()
         writer.add_scalar('train/lr', optimizer.param_groups[0]['lr'], epoch)
